@@ -25,8 +25,16 @@ tauri = { version = "2.9.5", features = [] }
 tauri-plugin-log = "2"
 tauri-plugin-fs = "2"
 portable-pty = "0.8"
-uuid = { version = "1.0", features = ["v4"] }
-tokio = { version = "1", features = ["sync", "time", "rt-multi-thread"] }
+uuid = { version = "1.0", features = ["v4", "v7"] }
+tokio = { version = "1", features = ["sync", "time", "rt-multi-thread", "fs", "macros"] }
 parking_lot = "0.12"
 chrono = { version = "0.4", features = ["serde"] }
 dirs = "5.0"
+rusqlite = { version = "0.32", features = ["bundled"] }
+thiserror = "2.0"
+reqwest = { version = "0.12", features = ["json", "stream"] }
+futures = "0.3"
+walkdir = "2.5"
+notify = { version = "6.1", features = ["serde"] }
+git2 = "0.19"
+serde_yaml = "0.9"
