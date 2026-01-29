@@ -1,65 +1,188 @@
-import Image from "next/image";
+'use client';
+
+import { ClaudeCore } from '@/components/ClaudeCore';
+import { GlassTerminal } from '@/components/GlassTerminal';
+import { StatusBar } from '@/components/StatusBar';
+import { AmbientBackground } from '@/components/AmbientBackground';
+import { useClaudeState } from '@/hooks/useClaudeState';
+import {
+  useCurrentState,
+  useIsConnected,
+  useCurrentEvent,
+  useCurrentToolName,
+  useMessages,
+  useEventCount,
+} from '@/lib/store';
+import { motion } from 'framer-motion';
 
 export default function Home() {
+  // Initialize state synchronization (only works in Tauri)
+  useClaudeState();
+
+  // Get state from Zustand store
+  const state = useCurrentState();
+  const isConnected = useIsConnected();
+  const event = useCurrentEvent();
+  const toolName = useCurrentToolName();
+  const messages = useMessages();
+  const eventCount = useEventCount();
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <>
+      {/* Ambient Background */}
+      <AmbientBackground />
+
+      {/* Main Layout Container */}
+      <div className="relative flex flex-col h-screen" style={{ zIndex: 1 }}>
+        {/* Header */}
+        <motion.header
+          className="flex items-center justify-between px-8 py-4 border-b border-amber-wire/30"
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+        >
+          {/* App Title */}
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <motion.div
+                className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-electric to-amber-deep flex items-center justify-center"
+                whileHover={{ scale: 1.05 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+              >
+                <div className="font-mono text-xs font-bold text-void-deepest">C</div>
+              </motion.div>
+              <h1 className="font-mono text-xl font-bold tracking-wider text-smoke-bright">
+                CLAUD<span className="text-amber-electric">.IO</span>
+              </h1>
+            </div>
+            <div className="h-4 w-px bg-amber-wire/30" />
+            <p className="font-mono text-xs text-smoke-dim">
+              // la casa de cristal del pensamiento
+            </p>
+          </div>
+
+          {/* Connection Status */}
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-2">
+              <div className={`led ${isConnected ? 'animate-led-pulse' : 'led--off'}`} />
+              <span className="font-mono text-xs uppercase tracking-wider text-smoke-mid">
+                {isConnected ? 'connected' : 'offline'}
+              </span>
+            </div>
+
+            <div className="h-4 w-px bg-amber-wire/30" />
+
+            <div className="font-mono text-xs text-smoke-dim">
+              v0.1.0
+            </div>
+          </div>
+        </motion.header>
+
+        {/* Main Content Area - Split View */}
+        <div className="flex-1 flex overflow-hidden">
+          {/* Left Panel - Visualization */}
+          <motion.div
+            className="flex-1 flex flex-col items-center justify-center p-8"
+            initial={{ x: -30, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+          >
+            {/* ClaudeCore Visualization */}
+            <div className="relative">
+              {/* Decorative corner accents around core */}
+              <motion.div
+                className="absolute -top-8 -left-8 w-16 h-16 border-l-2 border-t-2 border-amber-wire/20 rounded-tl-lg"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6, delay: 0.3 }}
+              />
+              <motion.div
+                className="absolute -top-8 -right-8 w-16 h-16 border-r-2 border-t-2 border-amber-wire/20 rounded-tr-lg"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+              />
+              <motion.div
+                className="absolute -bottom-8 -left-8 w-16 h-16 border-l-2 border-b-2 border-amber-wire/20 rounded-bl-lg"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6, delay: 0.5 }}
+              />
+              <motion.div
+                className="absolute -bottom-8 -right-8 w-16 h-16 border-r-2 border-b-2 border-amber-wire/20 rounded-br-lg"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6, delay: 0.6 }}
+              />
+
+              <ClaudeCore state={state} size="lg" />
+            </div>
+
+            {/* State Description */}
+            <motion.div
+              className="mt-12 text-center max-w-md"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+            >
+              <p className="font-mono text-sm text-smoke-mid leading-relaxed">
+                {state === 'idle' && 'Waiting for Claude to start thinking...'}
+                {state === 'thinking' && 'Claude is processing your request...'}
+                {state === 'working' && 'Claude is actively working on tools and actions...'}
+                {state === 'done' && 'Task completed successfully'}
+              </p>
+
+              {/* Current activity details */}
+              {isConnected && (event || toolName) && (
+                <motion.div
+                  className="mt-6 p-4 glass rounded-lg"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="font-mono text-xs space-y-2">
+                    {event && (
+                      <div className="flex items-center justify-between gap-4">
+                        <span className="text-smoke-dim">event:</span>
+                        <span className="text-smoke-bright text-right flex-1 truncate">
+                          {event}
+                        </span>
+                      </div>
+                    )}
+                    {toolName && (
+                      <div className="flex items-center justify-between gap-4">
+                        <span className="text-smoke-dim">tool:</span>
+                        <span className="text-amber-electric text-right flex-1 truncate">
+                          {toolName}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </motion.div>
+          </motion.div>
+
+          {/* Right Panel - Terminal */}
+          <motion.div
+            className="w-[480px] border-l border-amber-wire/30 glass flex flex-col"
+            initial={{ x: 30, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <GlassTerminal messages={messages} />
+          </motion.div>
+        </div>
+
+        {/* Status Bar */}
+        <StatusBar
+          state={state}
+          isConnected={isConnected}
+          eventCount={eventCount}
+          currentEvent={event}
+          toolName={toolName}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+      </div>
+    </>
   );
 }
