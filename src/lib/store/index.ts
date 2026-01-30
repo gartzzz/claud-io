@@ -15,6 +15,7 @@ import { ProjectsSlice, createProjectsSlice } from './slices/projectsSlice';
 import { AgentsSlice, createAgentsSlice } from './slices/agentsSlice';
 import { ContentSlice, createContentSlice } from './slices/contentSlice';
 import { SyncSlice, createSyncSlice } from './slices/syncSlice';
+import { WizardSlice, createWizardSlice } from './slices/wizardSlice';
 
 // Re-export types
 export * from './types';
@@ -25,6 +26,8 @@ export type { ProjectsSlice } from './slices/projectsSlice';
 export type { AgentsSlice } from './slices/agentsSlice';
 export type { ContentSlice } from './slices/contentSlice';
 export type { SyncSlice, DiscoveredProject, AgentDefinition, RepoStatus, GitSyncResult } from './slices/syncSlice';
+export type { WizardSlice, WizardStep, WizardFormData, AgentModel, AgentMode } from './slices/wizardSlice';
+export { availableTools } from './slices/wizardSlice';
 
 /**
  * Combined app state type
@@ -36,7 +39,8 @@ export type AppState =
   & ProjectsSlice
   & AgentsSlice
   & ContentSlice
-  & SyncSlice;
+  & SyncSlice
+  & WizardSlice;
 
 /**
  * Slice creator type for use in slice files
@@ -62,6 +66,7 @@ export const useAppStore = create<AppState>()(
         ...createAgentsSlice(set as any, get as any, store as any),
         ...createContentSlice(set as any, get as any, store as any),
         ...createSyncSlice(set as any, get as any, store as any),
+        ...createWizardSlice(set as any, get as any, store as any),
       }))
     ),
     {
@@ -383,5 +388,48 @@ export const useSyncActions = () => {
     getAgentsPath: store.getAgentsPath,
     getAgentsRepoStatus: store.getAgentsRepoStatus,
     setupSyncEventListeners: store.setupSyncEventListeners,
+  };
+};
+
+// ============================================================================
+// Wizard Selectors
+// ============================================================================
+
+export const useWizardOpen = () =>
+  useAppStore((state) => state.wizardOpen);
+
+export const useWizardStep = () =>
+  useAppStore((state) => state.wizardStep);
+
+export const useWizardFormData = () =>
+  useAppStore((state) => state.wizardFormData);
+
+export const useIsOptimizing = () =>
+  useAppStore((state) => state.isOptimizing);
+
+export const useOptimizedPrompt = () =>
+  useAppStore((state) => state.optimizedPrompt);
+
+export const useIsCreatingAgent = () =>
+  useAppStore((state) => state.isCreating);
+
+export const useWizardError = () =>
+  useAppStore((state) => state.wizardError);
+
+export const useWizardActions = () => {
+  const store = useAppStore();
+  return {
+    openWizard: store.openWizard,
+    closeWizard: store.closeWizard,
+    resetWizard: store.resetWizard,
+    nextStep: store.nextStep,
+    prevStep: store.prevStep,
+    goToStep: store.goToStep,
+    updateFormData: store.updateFormData,
+    importTemplate: store.importTemplate,
+    optimizePrompt: store.optimizePrompt,
+    acceptOptimizedPrompt: store.acceptOptimizedPrompt,
+    rejectOptimizedPrompt: store.rejectOptimizedPrompt,
+    createAgentFromWizard: store.createAgentFromWizard,
   };
 };

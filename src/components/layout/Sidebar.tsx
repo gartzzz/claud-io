@@ -11,7 +11,7 @@
  */
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAppStore } from '@/lib/store';
+import { useAppStore, useWizardActions } from '@/lib/store';
 import type { ActiveModule } from '@/lib/store/types';
 import { SidebarProjectsSection, SidebarAgentsSection } from '@/components/sidebar';
 
@@ -92,6 +92,7 @@ export function Sidebar() {
   const setActiveModule = useAppStore((state) => state.setActiveModule);
   const toggleSidebar = useAppStore((state) => state.toggleSidebar);
   const toggleCommandPalette = useAppStore((state) => state.toggleCommandPalette);
+  const { openWizard } = useWizardActions();
 
   // Agent status mini indicator
   const agents = useAppStore((state) => state.agents);
@@ -216,9 +217,7 @@ export function Sidebar() {
             console.log('Selected agent:', agent.name);
           }}
           onCreateAgent={() => {
-            setActiveModule('agents');
-            // TODO: Open agent creation wizard
-            console.log('Create new agent');
+            openWizard();
           }}
         />
       </div>
