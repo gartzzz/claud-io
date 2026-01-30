@@ -20,6 +20,11 @@ import {
   useLastAgentsSync,
   type AgentDefinition,
 } from '@/lib/store';
+import {
+  getModelColor,
+  getModeIcon,
+  getModeColor,
+} from '@/lib/constants/agentStyles';
 
 interface SidebarAgentsSectionProps {
   collapsed: boolean;
@@ -28,18 +33,6 @@ interface SidebarAgentsSectionProps {
   runningCount?: number;
   queuedCount?: number;
 }
-
-// Model badge colors - refined for premium look
-const modelColors: Record<string, string> = {
-  'opus-4': 'text-purple-400',
-  'sonnet-4': 'text-cyan-400',
-  'sonnet': 'text-cyan-400/80',
-  'opus': 'text-purple-400/80',
-  'haiku': 'text-emerald-400',
-  'claude-opus': 'text-purple-400',
-  'claude-sonnet': 'text-cyan-400',
-  'claude-haiku': 'text-emerald-400',
-};
 
 export function SidebarAgentsSection({
   collapsed,
@@ -101,14 +94,14 @@ export function SidebarAgentsSection({
         <motion.div
           initial={{ opacity: 0, y: -5 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-2 mx-1.5 px-2 py-1.5 rounded-lg bg-gradient-to-r from-emerald-500/10 to-cyan-500/10 border border-emerald-500/20"
+          className="mb-3 mx-2 px-3 py-2 rounded-lg bg-gradient-to-r from-emerald-500/10 to-cyan-500/10 border border-emerald-500/20"
         >
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               {runningCount > 0 && (
                 <>
-                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  <span className="font-mono text-[9px] text-emerald-400 font-medium">
+                  <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="font-mono text-xs text-emerald-400 font-medium">
                     {runningCount} active
                   </span>
                 </>
@@ -116,8 +109,8 @@ export function SidebarAgentsSection({
             </div>
             {queuedCount > 0 && (
               <>
-                {runningCount > 0 && <span className="text-smoke-dim/30 text-[8px]">·</span>}
-                <span className="font-mono text-[9px] text-cyan-400/70">
+                {runningCount > 0 && <span className="text-smoke-dim/30 text-xs">·</span>}
+                <span className="font-mono text-xs text-cyan-400/70">
                   {queuedCount} queued
                 </span>
               </>
@@ -127,14 +120,14 @@ export function SidebarAgentsSection({
       )}
 
       {/* Section Header */}
-      <div className="flex items-center justify-between px-1.5 py-1">
+      <div className="flex items-center justify-between px-2 py-2">
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="flex items-center gap-2 hover:bg-void-lighter/30 rounded-md px-1 py-0.5 transition-all duration-200"
+          className="flex items-center gap-2 hover:bg-void-lighter/30 rounded-md px-2 py-1 transition-all duration-200"
         >
           <motion.svg
-            width="10"
-            height="10"
+            width="12"
+            height="12"
             viewBox="0 0 10 10"
             fill="none"
             stroke="currentColor"
@@ -145,14 +138,14 @@ export function SidebarAgentsSection({
           >
             <path d="M3 1.5L6.5 5L3 8.5" />
           </motion.svg>
-          <span className="font-mono text-[10px] text-smoke-dim uppercase tracking-widest font-medium">
+          <span className="font-mono text-[13px] text-smoke-dim uppercase tracking-widest font-medium">
             Agents
           </span>
         </button>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2">
           {agents.length > 0 && (
-            <span className="font-mono text-[10px] text-smoke-dim/70">
+            <span className="font-mono text-xs text-smoke-dim/70">
               {agents.length}
             </span>
           )}
@@ -160,12 +153,12 @@ export function SidebarAgentsSection({
           {/* Create agent button */}
           <motion.button
             onClick={onCreateAgent}
-            className="p-0.5 rounded text-smoke-dim hover:text-amber-electric transition-colors duration-200"
+            className="p-1.5 rounded text-smoke-dim hover:text-amber-electric transition-colors duration-200"
             whileHover={{ scale: 1.15 }}
             whileTap={{ scale: 0.9 }}
             title="Create new agent"
           >
-            <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <svg width="14" height="14" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path d="M6 2V10M2 6H10" />
             </svg>
           </motion.button>
@@ -174,14 +167,14 @@ export function SidebarAgentsSection({
           <motion.button
             onClick={handleSync}
             disabled={isSyncing}
-            className="p-0.5 rounded text-smoke-dim hover:text-smoke-bright transition-colors duration-200 disabled:opacity-50"
+            className="p-1.5 rounded text-smoke-dim hover:text-smoke-bright transition-colors duration-200 disabled:opacity-50"
             whileHover={{ scale: 1.15 }}
             whileTap={{ scale: 0.9 }}
             title="Sync from MR-AGENTS repo"
           >
             <svg
-              width="11"
-              height="11"
+              width="14"
+              height="14"
               viewBox="0 0 12 12"
               fill="none"
               stroke="currentColor"
@@ -200,20 +193,20 @@ export function SidebarAgentsSection({
         <motion.div
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}
-          className="px-1.5 mb-1.5 overflow-hidden"
+          className="px-2 mb-2 overflow-hidden"
         >
-          <div className="flex items-center gap-1.5 px-1.5 py-0.5 rounded bg-void-lighter/30 border border-amber-wire/5">
-            <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
-              <circle cx="4" cy="4" r="1.5" fill={repoStatus.hasChanges ? '#F59E0B' : '#10B981'} opacity="0.6" />
+          <div className="flex items-center gap-2 px-2 py-1.5 rounded bg-void-lighter/30 border border-amber-wire/5">
+            <svg width="10" height="10" viewBox="0 0 8 8" fill="none">
+              <circle cx="4" cy="4" r="2" fill={repoStatus.hasChanges ? '#F59E0B' : '#10B981'} opacity="0.6" />
             </svg>
-            <span className="font-mono text-[9px] text-smoke-dim/70 tracking-wide">
+            <span className="font-mono text-xs text-smoke-dim/70 tracking-wide">
               {repoStatus.branch}
             </span>
-            <span className="font-mono text-[9px] text-smoke-dim/50">
+            <span className="font-mono text-xs text-smoke-dim/50">
               {repoStatus.commit.slice(0, 7)}
             </span>
             {repoStatus.hasChanges && (
-              <span className="text-amber-electric text-[9px]">*</span>
+              <span className="text-amber-electric text-xs">*</span>
             )}
           </div>
         </motion.div>
@@ -231,7 +224,7 @@ export function SidebarAgentsSection({
           >
             {/* Search */}
             {agents.length > 5 && (
-              <div className="px-1.5 mb-2">
+              <div className="px-2 mb-3">
                 <div className="relative">
                   <input
                     type="text"
@@ -239,14 +232,14 @@ export function SidebarAgentsSection({
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Filter agents..."
                     className="
-                      w-full px-2 py-1.5 pl-6 rounded-lg
+                      w-full px-3 py-2 pl-8 rounded-lg
                       bg-void-lighter/40 border border-amber-wire/10
-                      font-mono text-[11px] text-smoke-bright placeholder:text-smoke-dim/60
+                      font-mono text-sm text-smoke-bright placeholder:text-smoke-dim/60
                       focus:outline-none focus:border-amber-electric/30 focus:bg-void-lighter/60
                       transition-all duration-200
                     "
                   />
-                  <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" className="absolute left-2 top-1/2 -translate-y-1/2 text-smoke-dim/60">
+                  <svg width="14" height="14" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" className="absolute left-2.5 top-1/2 -translate-y-1/2 text-smoke-dim/60">
                     <circle cx="5" cy="5" r="3" />
                     <path d="M10 10l-3-3" />
                   </svg>
@@ -254,24 +247,24 @@ export function SidebarAgentsSection({
               </div>
             )}
 
-            <div className="space-y-0.5 max-h-[400px] overflow-y-auto px-0.5">
+            <div className="space-y-1 max-h-[40vh] overflow-y-auto px-1">
               {filteredAgents.length === 0 ? (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="px-2 py-8 text-center"
+                  className="px-3 py-8 text-center"
                 >
-                  <div className="w-10 h-10 mx-auto mb-2 rounded-lg bg-void-lighter/30 flex items-center justify-center">
-                    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-smoke-dim/50">
+                  <div className="w-12 h-12 mx-auto mb-3 rounded-lg bg-void-lighter/30 flex items-center justify-center">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-smoke-dim/50">
                       <circle cx="10" cy="6" r="3" />
                       <path d="M4 17v-1a4 4 0 014-4h4a4 4 0 014 4v1" />
                     </svg>
                   </div>
-                  <span className="font-mono text-[11px] text-smoke-dim/70 block">
+                  <span className="font-mono text-sm text-smoke-dim/70 block">
                     {searchQuery ? 'No matches' : 'No agents'}
                   </span>
                   {!searchQuery && (
-                    <span className="font-mono text-[10px] text-smoke-dim/50 block mt-0.5">Pull from MR-AGENTS repo</span>
+                    <span className="font-mono text-xs text-smoke-dim/50 block mt-1">Pull from MR-AGENTS repo</span>
                   )}
                 </motion.div>
               ) : (
@@ -303,26 +296,14 @@ interface AgentItemProps {
 }
 
 function AgentItem({ agent, onSelect }: AgentItemProps) {
-  // Get mode-based styling
-  const getModeColor = (mode: string) => {
-    const colors: Record<string, string> = {
-      code: 'from-cyan-500/20 to-blue-500/20 border-cyan-500/20',
-      architect: 'from-purple-500/20 to-pink-500/20 border-purple-500/20',
-      standard: 'from-emerald-500/20 to-green-500/20 border-emerald-500/20',
-    };
-    return colors[mode.toLowerCase()] || 'from-smoke-dim/10 to-smoke-dim/20 border-smoke-dim/20';
-  };
-
-  const getModeIcon = (mode: string) => {
-    const lower = mode.toLowerCase();
-    if (lower.includes('code')) return '◆';
-    if (lower.includes('architect')) return '▲';
-    return '●';
-  };
+  // Use centralized style functions
+  const modeColor = getModeColor(agent.mode);
+  const modeIcon = getModeIcon(agent.mode);
+  const modelColor = getModelColor(agent.model);
 
   // Truncate description
-  const shortDesc = agent.description.length > 60
-    ? agent.description.slice(0, 60) + '...'
+  const shortDesc = agent.description.length > 80
+    ? agent.description.slice(0, 80) + '...'
     : agent.description;
 
   return (
@@ -330,39 +311,39 @@ function AgentItem({ agent, onSelect }: AgentItemProps) {
       onClick={() => onSelect?.(agent)}
       className="
         w-full group relative text-left
-        px-2 py-2.5 rounded-lg
+        px-3 py-3 rounded-xl
         bg-void-lighter/0 hover:bg-void-lighter/50
         border border-transparent hover:border-amber-wire/10
         transition-all duration-200 ease-out
       "
-      whileHover={{ x: 1 }}
+      whileHover={{ x: 2 }}
       whileTap={{ scale: 0.98 }}
     >
-      <div className="flex items-start gap-2.5">
+      <div className="flex items-start gap-3">
         {/* Agent icon with mode indicator */}
         <div className={`
-          shrink-0 w-6 h-6 rounded-md
-          bg-gradient-to-br ${getModeColor(agent.mode)}
+          shrink-0 w-9 h-9 rounded-lg
+          bg-gradient-to-br ${modeColor}
           border flex items-center justify-center
           group-hover:scale-105 transition-transform duration-200
         `}>
-          <span className="font-mono text-[10px] text-smoke-bright opacity-80">
-            {getModeIcon(agent.mode)}
+          <span className="font-mono text-sm text-smoke-bright opacity-90">
+            {modeIcon}
           </span>
         </div>
 
         {/* Content */}
-        <div className="flex-1 min-w-0 space-y-1">
+        <div className="flex-1 min-w-0 space-y-1.5">
           {/* Header row */}
           <div className="flex items-center justify-between gap-2">
-            <span className="font-mono text-[11px] text-smoke-mid group-hover:text-smoke-bright font-medium truncate transition-colors leading-tight">
+            <span className="font-mono text-[15px] text-smoke-mid group-hover:text-smoke-bright font-medium truncate transition-colors leading-tight">
               {agent.name}
             </span>
 
             {/* Model badge */}
             <div className="flex items-center gap-1 shrink-0">
               <span
-                className={`font-mono text-[9px] uppercase tracking-wide ${modelColors[agent.model] || 'text-smoke-dim/60'} font-medium`}
+                className={`font-mono text-xs uppercase tracking-wide ${modelColor} font-medium`}
                 title={`Model: ${agent.model}`}
               >
                 {agent.model}
@@ -372,15 +353,15 @@ function AgentItem({ agent, onSelect }: AgentItemProps) {
 
           {/* Description */}
           {agent.description && (
-            <p className="font-mono text-[9px] text-smoke-dim/70 leading-relaxed line-clamp-2">
+            <p className="font-mono text-xs text-smoke-dim/70 leading-relaxed line-clamp-2">
               {shortDesc}
             </p>
           )}
 
           {/* Metadata row */}
-          <div className="flex items-center gap-2 pt-0.5">
+          <div className="flex items-center gap-2 pt-1">
             {/* Mode badge */}
-            <span className="font-mono text-[8px] text-smoke-dim/60 uppercase tracking-wider">
+            <span className="font-mono text-[11px] text-smoke-dim/60 uppercase tracking-wider">
               {agent.mode}
             </span>
 
@@ -390,7 +371,7 @@ function AgentItem({ agent, onSelect }: AgentItemProps) {
             )}
 
             {/* File indicator */}
-            <span className="font-mono text-[8px] text-smoke-dim/50" title={agent.filename}>
+            <span className="font-mono text-[11px] text-smoke-dim/50" title={agent.filename}>
               {agent.filename.replace('.md', '')}
             </span>
           </div>
@@ -398,7 +379,7 @@ function AgentItem({ agent, onSelect }: AgentItemProps) {
       </div>
 
       {/* Hover glow effect */}
-      <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-amber-electric/0 via-amber-electric/5 to-amber-electric/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-amber-electric/0 via-amber-electric/5 to-amber-electric/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
     </motion.button>
   );
 }

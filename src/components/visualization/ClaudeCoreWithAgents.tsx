@@ -108,12 +108,12 @@ export function ClaudeCoreWithAgents({
       {/* Agent count indicator (if more agents than visible) */}
       {agents.length > maxVisibleAgents && (
         <motion.div
-          className="absolute bottom-2 right-2 z-10 px-2 py-1 rounded-lg bg-void-mid/80 border border-amber-wire/20"
+          className="absolute bottom-3 right-3 z-10 px-3 py-1.5 rounded-lg bg-void-mid/80 border border-amber-wire/20"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
         >
-          <span className="font-mono text-xs text-smoke-dim">
+          <span className="font-mono text-sm text-smoke-dim">
             +{agents.length - maxVisibleAgents} more
           </span>
         </motion.div>
@@ -186,12 +186,12 @@ function StatBadge({ label, count, color }: StatBadgeProps) {
   if (count === 0) return null;
 
   return (
-    <div className="flex items-center gap-1.5">
+    <div className="flex items-center gap-2 px-2 py-1 rounded-lg bg-void-mid/50">
       <div
-        className="w-1.5 h-1.5 rounded-full"
+        className="w-2 h-2 rounded-full"
         style={{ background: color }}
       />
-      <span className="font-mono text-[10px] text-smoke-dim">
+      <span className="font-mono text-xs text-smoke-dim">
         {count} {label}
       </span>
     </div>

@@ -13,40 +13,7 @@
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useState, useMemo } from 'react';
 import type { Agent, AgentType, AgentStatus } from '@/types/agent';
-
-// Agent type to color mapping
-const agentTypeColors: Record<AgentType, { primary: string; glow: string; bg: string }> = {
-  copywriting: {
-    primary: 'var(--amber-electric)',
-    glow: 'var(--amber-glow)',
-    bg: 'rgba(245, 158, 11, 0.2)',
-  },
-  'code-generation': {
-    primary: '#22d3ee', // cyan-400
-    glow: 'rgba(34, 211, 238, 0.5)',
-    bg: 'rgba(34, 211, 238, 0.2)',
-  },
-  'code-review': {
-    primary: '#60a5fa', // blue-400
-    glow: 'rgba(96, 165, 250, 0.5)',
-    bg: 'rgba(96, 165, 250, 0.2)',
-  },
-  design: {
-    primary: '#c084fc', // purple-400
-    glow: 'rgba(192, 132, 252, 0.5)',
-    bg: 'rgba(192, 132, 252, 0.2)',
-  },
-  research: {
-    primary: '#4ade80', // green-400
-    glow: 'rgba(74, 222, 128, 0.5)',
-    bg: 'rgba(74, 222, 128, 0.2)',
-  },
-  general: {
-    primary: '#94a3b8', // slate-400
-    glow: 'rgba(148, 163, 184, 0.5)',
-    bg: 'rgba(148, 163, 184, 0.2)',
-  },
-};
+import { AGENT_TYPE_COLORS, getAgentTypeColors } from '@/lib/constants/agentStyles';
 
 // Status-based animation configurations
 const statusConfig: Record<AgentStatus, {
@@ -120,14 +87,14 @@ function AgentAvatar({
   agent,
   angle,
   orbitRadius,
-  size = 28,
+  size = 44, // Increased from 28px for better visibility
   onSelect,
   currentTaskTitle,
 }: AgentAvatarProps) {
   const [isHovered, setIsHovered] = useState(false);
   const shouldReduce = useReducedMotion();
 
-  const colors = agentTypeColors[agent.type] || agentTypeColors.general;
+  const colors = getAgentTypeColors(agent.type);
   const config = statusConfig[agent.status] || statusConfig.idle;
 
   const isError = agent.status === 'error';
@@ -272,7 +239,7 @@ interface AgentTooltipProps {
 }
 
 function AgentTooltip({ agent, currentTaskTitle }: AgentTooltipProps) {
-  const colors = agentTypeColors[agent.type] || agentTypeColors.general;
+  const colors = getAgentTypeColors(agent.type);
 
   return (
     <motion.div
@@ -280,7 +247,7 @@ function AgentTooltip({ agent, currentTaskTitle }: AgentTooltipProps) {
       style={{
         left: '50%',
         bottom: '100%',
-        marginBottom: 8,
+        marginBottom: 12,
         transform: 'translateX(-50%)',
       }}
       initial={{ opacity: 0, y: 5, scale: 0.95 }}
@@ -289,7 +256,7 @@ function AgentTooltip({ agent, currentTaskTitle }: AgentTooltipProps) {
       transition={{ duration: 0.15 }}
     >
       <div
-        className="px-3 py-2 rounded-lg border backdrop-blur-md whitespace-nowrap"
+        className="px-4 py-3 rounded-xl border backdrop-blur-md whitespace-nowrap"
         style={{
           background: 'rgba(13, 13, 17, 0.95)',
           borderColor: colors.primary,
@@ -297,45 +264,45 @@ function AgentTooltip({ agent, currentTaskTitle }: AgentTooltipProps) {
         }}
       >
         {/* Agent name and type */}
-        <div className="flex items-center gap-2 mb-1">
+        <div className="flex items-center gap-3 mb-2">
           <span
-            className="font-mono text-xs font-medium"
+            className="font-mono text-sm font-medium"
             style={{ color: colors.primary }}
           >
             {agent.name}
           </span>
-          <span className="font-mono text-[10px] text-smoke-dim uppercase">
+          <span className="font-mono text-xs text-smoke-dim uppercase">
             {agent.type.replace('-', ' ')}
           </span>
         </div>
 
         {/* Status */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2">
           <div
-            className="w-1.5 h-1.5 rounded-full"
+            className="w-2 h-2 rounded-full"
             style={{ background: getStatusColor(agent.status) }}
           />
-          <span className="font-mono text-[10px] text-smoke-mid capitalize">
+          <span className="font-mono text-xs text-smoke-mid capitalize">
             {agent.status}
           </span>
         </div>
 
         {/* Current task if working */}
         {currentTaskTitle && agent.status === 'working' && (
-          <div className="mt-1.5 pt-1.5 border-t border-amber-wire/20">
-            <p className="font-mono text-[10px] text-smoke-dim truncate max-w-[180px]">
+          <div className="mt-2 pt-2 border-t border-amber-wire/20">
+            <p className="font-mono text-xs text-smoke-dim truncate max-w-[200px]">
               {currentTaskTitle}
             </p>
           </div>
         )}
 
         {/* Stats preview */}
-        <div className="mt-1.5 flex items-center gap-3">
-          <span className="font-mono text-[10px] text-smoke-dim">
+        <div className="mt-2 flex items-center gap-4">
+          <span className="font-mono text-xs text-smoke-dim">
             {agent.stats.tasksCompleted} tasks
           </span>
           {agent.stats.userSatisfaction > 0 && (
-            <span className="font-mono text-[10px] text-smoke-dim">
+            <span className="font-mono text-xs text-smoke-dim">
               {agent.stats.userSatisfaction.toFixed(1)}★
             </span>
           )}
@@ -344,7 +311,7 @@ function AgentTooltip({ agent, currentTaskTitle }: AgentTooltipProps) {
 
       {/* Arrow */}
       <div
-        className="absolute left-1/2 -translate-x-1/2 -bottom-1 w-2 h-2 rotate-45"
+        className="absolute left-1/2 -translate-x-1/2 -bottom-1 w-2.5 h-2.5 rotate-45"
         style={{
           background: 'rgba(13, 13, 17, 0.95)',
           borderRight: `1px solid ${colors.primary}`,
