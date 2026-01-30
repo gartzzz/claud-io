@@ -18,6 +18,7 @@
     "@xterm/addon-webgl": "^0.19.0",
     "@xterm/xterm": "^6.0.0",
     "framer-motion": "^12.29.2",
+    "immer": "^10.1.1",
     "next": "16.1.6",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",

@@ -94,7 +94,7 @@ export function Sidebar() {
   const toggleCommandPalette = useAppStore((state) => state.toggleCommandPalette);
   const { openWizard } = useWizardActions();
 
-  // Agent status mini indicator
+  // Agent status for passing to agents section
   const agents = useAppStore((state) => state.agents);
   const runningAgents = agents.filter((a) => a.status === 'working').length;
   const taskQueue = useAppStore((state) => state.taskQueue);
@@ -107,15 +107,19 @@ export function Sidebar() {
       transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
     >
       {/* Logo */}
-      <div className="flex items-center h-14 px-3 border-b border-amber-wire/20">
+      <div className="flex items-center h-14 px-3 border-b border-amber-wire/20 bg-gradient-to-b from-void-deep to-transparent">
         <motion.div
-          className="flex items-center gap-3 cursor-pointer"
+          className="flex items-center gap-3 cursor-pointer group"
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={toggleSidebar}
         >
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-electric to-amber-deep flex items-center justify-center shrink-0">
-            <span className="font-mono text-xs font-bold text-void-deepest">C</span>
+          <div className="relative">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-electric to-amber-deep flex items-center justify-center shrink-0 shadow-md shadow-amber-electric/20 group-hover:shadow-lg group-hover:shadow-amber-electric/30 transition-shadow duration-200">
+              <span className="font-mono text-xs font-bold text-void-deepest">C</span>
+            </div>
+            {/* Glow ring */}
+            <div className="absolute inset-0 rounded-lg bg-amber-electric/20 blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200 -z-10" />
           </div>
           <AnimatePresence>
             {!sidebarCollapsed && (
@@ -126,7 +130,7 @@ export function Sidebar() {
                 exit={{ opacity: 0, x: -10 }}
                 transition={{ duration: 0.15 }}
               >
-                CLAUD<span className="text-amber-electric">.IO</span>
+                CLAUD<span className="text-amber-electric group-hover:text-amber-bright transition-colors duration-200">.IO</span>
               </motion.span>
             )}
           </AnimatePresence>
@@ -134,17 +138,17 @@ export function Sidebar() {
       </div>
 
       {/* Navigation */}
-      <nav className="py-3 px-2 space-y-1">
+      <nav className="py-3 px-2 space-y-0.5">
         {navItems.map((item) => (
           <motion.button
             key={item.id}
             onClick={() => setActiveModule(item.id)}
             className={`
               w-full flex items-center gap-3 px-3 py-2.5 rounded-lg
-              transition-colors group relative
+              transition-all duration-200 ease-out group relative
               ${
                 activeModule === item.id
-                  ? 'bg-amber-electric/10 text-amber-electric'
+                  ? 'bg-amber-electric/10 text-amber-electric shadow-sm shadow-amber-electric/20'
                   : 'text-smoke-mid hover:text-smoke-bright hover:bg-void-lighter/50'
               }
             `}
@@ -196,7 +200,7 @@ export function Sidebar() {
       <div className="mx-3 border-t border-amber-wire/20" />
 
       {/* Synced Folders */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto px-2 py-3 space-y-1">
         {/* Projects Section */}
         <SidebarProjectsSection
           collapsed={sidebarCollapsed}
@@ -206,8 +210,21 @@ export function Sidebar() {
           }}
         />
 
-        {/* Divider */}
-        <div className="mx-3 border-t border-amber-wire/10" />
+        {/* Subtle divider */}
+        {!sidebarCollapsed && (
+          <div className="relative py-3">
+            <div className="absolute inset-0 flex items-center px-2">
+              <div className="w-full border-t border-amber-wire/5" />
+            </div>
+            <div className="relative flex justify-center">
+              <span className="bg-void-deep px-2">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="text-smoke-dim/20">
+                  <circle cx="6" cy="6" r="1" fill="currentColor" />
+                </svg>
+              </span>
+            </div>
+          </div>
+        )}
 
         {/* Agents Section */}
         <SidebarAgentsSection
@@ -219,58 +236,30 @@ export function Sidebar() {
           onCreateAgent={() => {
             openWizard();
           }}
+          runningCount={runningAgents}
+          queuedCount={taskQueue.pending}
         />
       </div>
 
-      {/* Agent Status Mini */}
-      <div className="px-2 py-3 border-t border-amber-wire/20">
-        <motion.button
-          onClick={() => setActiveModule('agents')}
-          className={`
-            w-full flex items-center gap-3 px-3 py-2 rounded-lg
-            text-smoke-mid hover:text-smoke-bright hover:bg-void-lighter/50
-            transition-colors
-          `}
-          whileHover={{ x: 2 }}
-        >
-          {/* Status indicator */}
-          <div className={`w-2 h-2 rounded-full ${runningAgents > 0 ? 'bg-state-success animate-pulse' : 'bg-smoke-dim'}`} />
-
-          <AnimatePresence>
-            {!sidebarCollapsed && (
-              <motion.div
-                className="flex-1 flex items-center justify-between"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.1 }}
-              >
-                <span className="font-mono text-xs">
-                  {runningAgents > 0 ? `${runningAgents} working` : 'Agents idle'}
-                </span>
-                {taskQueue.pending > 0 && (
-                  <span className="font-mono text-xs text-amber-electric">
-                    {taskQueue.pending} queued
-                  </span>
-                )}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </motion.button>
-      </div>
-
       {/* Command Palette Trigger */}
-      <div className="px-2 py-3 border-t border-amber-wire/20">
+      <div className="px-2 py-3 border-t border-amber-wire/10">
         <motion.button
           onClick={toggleCommandPalette}
           className="
-            w-full flex items-center gap-3 px-3 py-2 rounded-lg
-            text-smoke-dim hover:text-smoke-bright hover:bg-void-lighter/50
-            transition-colors
+            w-full flex items-center gap-3 px-3 py-2.5 rounded-lg
+            bg-gradient-to-r from-void-lighter/30 to-void-lighter/50
+            border border-amber-wire/10
+            text-smoke-dim hover:text-amber-electric hover:border-amber-electric/30
+            transition-all duration-200 ease-out
+            group relative overflow-hidden
           "
-          whileHover={{ x: 2 }}
+          whileHover={{ x: 1, scale: 1.01 }}
+          whileTap={{ scale: 0.98 }}
         >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+          {/* Glow effect on hover */}
+          <div className="absolute inset-0 bg-gradient-to-r from-amber-electric/0 via-amber-electric/5 to-amber-electric/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="relative z-10">
             <circle cx="6" cy="6" r="4" />
             <path d="M14 14l-4-4" />
           </svg>
@@ -278,14 +267,16 @@ export function Sidebar() {
           <AnimatePresence>
             {!sidebarCollapsed && (
               <motion.div
-                className="flex-1 flex items-center justify-between"
+                className="flex-1 flex items-center justify-between relative z-10"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.1 }}
               >
-                <span className="font-mono text-xs">Search</span>
-                <span className="font-mono text-xs">⌘K</span>
+                <span className="font-mono text-xs font-medium">Search</span>
+                <span className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-void-lighter/50 border border-amber-wire/20 text-smoke-dim group-hover:text-smoke-mid group-hover:border-amber-electric/20 transition-colors">
+                  ⌘K
+                </span>
               </motion.div>
             )}
           </AnimatePresence>

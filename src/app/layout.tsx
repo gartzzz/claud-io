@@ -9,7 +9,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "Claud.io",
-  description: "La casa de cristal del pensamiento",
+  description: "La casa de cristal del pensamiento - Personal AI Command Center",
 };
 
 export default function RootLayout({
@@ -21,12 +21,12 @@ export default function RootLayout({
     <html lang="es">
       <body className={`${inter.variable} antialiased`}>
         {/* Title bar drag region for Mac */}
-        <div className="drag-region fixed top-0 left-0 right-0 h-7 z-50" />
+        <div className="drag-region fixed top-0 left-0 right-0 h-7 z-[100]" />
 
         {/* Main content with padding for title bar */}
-        <main className="pt-7 min-h-screen">
+        <div className="pt-7 h-screen overflow-hidden">
           {children}
-        </main>
+        </div>
       </body>
     </html>
   );

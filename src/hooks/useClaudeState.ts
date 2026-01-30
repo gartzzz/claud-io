@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { useClaudeStateStore, ClaudeStateData } from '@/lib/store';
+import { useAppStore, useClaudeActions, ClaudeStateData } from '@/lib/store';
 
 // Check if running in Tauri
 const isTauri = typeof window !== 'undefined' && '__TAURI__' in window;
@@ -25,14 +25,14 @@ const isTauri = typeof window !== 'undefined' && '__TAURI__' in window;
  * ```
  */
 export function useClaudeState() {
-  const { setStateData, setError, setConnected, reset, addMessage, incrementEventCount } = useClaudeStateStore();
+  const { setClaudeState, setError, setConnected, resetClaude, addMessage, incrementEventCount } = useClaudeActions();
   const unlistenRef = useRef<(() => void) | null>(null);
   const prevStateRef = useRef<ClaudeStateData | null>(null);
 
   useEffect(() => {
     // Only run in Tauri environment
     if (!isTauri) {
-      reset();
+      resetClaude();
       return;
     }
 
@@ -50,7 +50,6 @@ export function useClaudeState() {
         if (!exists) {
           setConnected(false);
           addMessage({
-            timestamp: new Date(),
             type: 'system',
             content: 'Waiting for Claude Code connection...',
           });
@@ -62,9 +61,8 @@ export function useClaudeState() {
         try {
           const initialState = await invoke<ClaudeStateData>('get_claude_state');
           if (isActive) {
-            setStateData(initialState);
+            setClaudeState(initialState);
             addMessage({
-              timestamp: new Date(),
               type: 'system',
               content: 'Connected to Claude Code',
             });
@@ -75,7 +73,6 @@ export function useClaudeState() {
           console.warn('[ClaudeState] Could not load initial state:', err);
           setConnected(false);
           addMessage({
-            timestamp: new Date(),
             type: 'error',
             content: 'Could not load initial state',
           });
@@ -90,12 +87,11 @@ export function useClaudeState() {
               const prevState = prevStateRef.current;
 
               console.info('[ClaudeState] State updated:', newState);
-              setStateData(newState);
+              setClaudeState(newState);
 
               // Track state changes
               if (prevState && prevState.state !== newState.state) {
                 addMessage({
-                  timestamp: new Date(),
                   type: 'event',
                   content: `State changed: ${newState.state}`,
                 });
@@ -105,7 +101,6 @@ export function useClaudeState() {
               if (prevState && prevState.event !== newState.event) {
                 incrementEventCount();
                 addMessage({
-                  timestamp: new Date(),
                   type: 'event',
                   content: newState.event,
                 });
@@ -114,7 +109,6 @@ export function useClaudeState() {
               // Track tool changes
               if (prevState && prevState.toolName !== newState.toolName && newState.toolName) {
                 addMessage({
-                  timestamp: new Date(),
                   type: 'tool',
                   content: `Using tool: ${newState.toolName}`,
                 });
@@ -142,14 +136,14 @@ export function useClaudeState() {
         unlistenRef.current = null;
       }
     };
-  }, [setStateData, setError, setConnected, reset, addMessage, incrementEventCount]);
+  }, [setClaudeState, setError, setConnected, resetClaude, addMessage, incrementEventCount]);
 }
 
 /**
  * Hook to get the state file path for debugging
  */
 export function useStateFilePath() {
-  const { stateData } = useClaudeStateStore();
+  const claudeState = useAppStore((state) => state.claudeState);
 
   useEffect(() => {
     if (!isTauri) return;
@@ -167,5 +161,5 @@ export function useStateFilePath() {
     getPath();
   }, []);
 
-  return stateData;
+  return claudeState;
 }
